@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+   
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="style" href="css/style.css">
+</head>
+
+<body>
+    <div id="app">
+        
+
+    </div>
+    
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+    var app = new Vue({
+        el: '#app2',
+        data: {
+        message: '',
+        }
+    });
+    const COLORS = [
+  { name: 'black', hex: '#000000'},
+  { name: 'red', hex: '#f44336'},
+  { name: 'pink', hex: '#E91E63'},
+  { name: 'purple', hex: '#9C27B0'},
+  { name: 'deeppurple', hex: '#673AB7'},
+  { name: 'indigo', hex: '#3F51B5'},
+  { name: 'blue', hex: '#2196F3'},
+  { name: 'lightblue', hex: '#03A9F4'},
+  { name: 'cyan', hex: '#00BCD4'},
+  { name: 'teal', hex: '#009688'},
+  { name: 'green', hex: '#4CAF50'},
+  { name: 'lightgreen', hex: '#8BC34A'},
+  { name: 'lime', hex: '#CDDC39'},
+  { name: 'yellow', hex: '#FFEB3B'},
+  { name: 'amber', hex: '#FFC107'},
+  { name: 'orange', hex: '#FF9800'},
+  { name: 'deeporange', hex: '#FF5722'},
+  { name: 'brown', hex: '#795548'},
+  { name: 'grey', hex: '#9E9E9E'}
+];
+
+const randomIndex = (max) => {
+  return Math.floor(Math.random() * max);
+}
+
+const BASE = COLORS[randomIndex(COLORS.length)];
+
+Vue.component('pixel', {
+  template: `
+  <div id="pixel">
+    <div class="pixel"
+         @mouseover="mouseOver"
+         @animationend="removeFade"
+         :class="{ 'fade' : fade }"
+         :style="{ 'background-color': color.hex }" />
+  </div>
+  `,
+  props: [ 'color', 'selected', 'iterate' ],
+  data: () => ({ fade: false }),
+  methods: {
+    mouseOver(event) {
+      if (this.fade){
+        this.fade = false;
+      }
+      
+      if (this.iterate) {
+        let count = 0;
+        const interval = setInterval(() => {
+          this.color = COLORS[randomIndex(COLORS.length)];
+            count++;
+            if (count > 10){
+              clearInterval(interval);
+              this.fade = true;
+            }
+        }, 50);
+      } else {
+        this.color = this.selected;
+        this.fade = true;
+      }
+    },
+    removeFade(event) {
+      this.color = BASE;
+      this.fade = false;
+    }
+  }
+});
+
+Vue.component('playground', {
+  template: `
+    <div id="playground" :style="{ 'background-color': color.hex }">
+      <div class="color-picker">
+        <div v-for="c in colors">
+          <div class="color"
+               @click="setColor(c)"
+               :class="{'active': selection.name === c.name }"
+               :style="{ 'background-color': c.hex }"></div>
+        </div>
+        <button type="button" @click="randomize()">Random!</button>
+        <button type="button" @click="loop()">Psycho</button>
+      </div>
+      <div class="container">
+        <div v-for="pixel in grid" :key="pixel">
+          <pixel :color="color" 
+                 :selected="selection"
+                 :iterate="iterate" />
+        </div>
+      </div>
+    </div>
+  `,
+  data: () => ({
+      color: BASE,
+      selection: BASE,
+      iterate: false,
+      colors: COLORS,
+      grid: Array.from({ length: 3000 }, (v, k) => k+1)
+  }),
+  methods: {
+    setColor(color) {
+      this.selection = color;
+    },
+    randomize() {
+      this.selection = this.colors[randomIndex(this.colors.length)];
+    },
+    loop() {
+      this.iterate = !this.iterate;
+    }
+  },
+  mounted() {
+    this.selection = COLORS.filter( x => x !== BASE )[randomIndex(COLORS.length - 1)];
+  }
+});
+
+new Vue({ el: '#app', template: `<playground />` });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script> 
+</body>
+</html>
